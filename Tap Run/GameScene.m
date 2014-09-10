@@ -16,10 +16,17 @@ typedef enum : NSUInteger {
     GAME_OVER,
     GAME_STOP,
 } GameState;
+
+typedef enum : NSUInteger {
+    PlayerMask = 1<<0,
+    PlatFormMask = 1<<1
+} BodyMask;
+
 @interface GameScene()
 @property(nonatomic) MKPlatform *platform;
 @property(nonatomic) NSUInteger gameState;
 @property(nonatomic) MKPlayer *player;
+@property(nonatomic) BOOL allowJump;
 -(void) initWorld;
 @end
 @implementation GameScene
@@ -36,12 +43,16 @@ typedef enum : NSUInteger {
     [self addChild:tipLbl];
     [tipLbl runAction:link];
     self.gameState = GAME_OVER;
+    self.allowJump = YES;
+    
 }
 
 -(void)initWorld
 {
     self.physicsWorld.gravity = CGVectorMake(0, -10);
     [self.physicsWorld removeAllJoints];
+    self.physicsWorld.contactDelegate = self;
+    self.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:self.frame];
 }
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -66,10 +77,14 @@ typedef enum : NSUInteger {
         self.backgroundColor = [SKColor whiteColor];
         [self initWorld];
         self.platform = [MKPlatform sharePlatform];
+        [self.platform setTestMask:PlayerMask category:PlatFormMask];
+
         [self addChild:self.platform];
         [self.platform reset];
         
         self.player = [MKPlayer createPlayer];
+        self.player.physicsBody.contactTestBitMask = PlatFormMask;
+        self.player.physicsBody.categoryBitMask = PlayerMask;
         MKBlock *frist = (MKBlock*)self.platform.blocks.firstObject;
         self.player.position = CGPointMake(self.player.size.width/2, frist.size.height + self.player.size.height/2);
         [self addChild:self.player];
@@ -80,15 +95,42 @@ typedef enum : NSUInteger {
 
 -(void) runGame
 {
-    if(self.player.physicsBody.velocity.dy == 0)
+    if(self.allowJump != NO)
     {
       [self.player.physicsBody applyImpulse:CGVectorMake(0, 500*self.player.physicsBody.mass)];
+        self.allowJump = NO;
     }
+}
+
+-(void)didBeginContact:(SKPhysicsContact *)contact
+{
+    self.allowJump = YES;
 }
 
 -(void)update:(CFTimeInterval)currentTime
 {
-    
+    [self.platform update:currentTime];
 }
 
+-(void)didSimulatePhysics
+{
+    MKBlock* firstBlock = (MKBlock*)self.platform.blocks.firstObject;
+    if(firstBlock == nil) return;
+    CGPoint firstPoint = [self convertPoint:firstBlock.position fromNode:self.platform];
+    if(firstPoint.x < -firstBlock.size.width)
+    {
+        [self.platform.blocks removeObject:firstBlock];
+        [firstBlock removeFromParent];
+    }
+    MKBlock* lastBlock = (MKBlock*) self.platform.blocks.lastObject;
+    if(lastBlock)
+    {
+        CGPoint lastPoint = [self convertPoint:lastBlock.position fromNode:self.platform];
+        if(lastPoint.x < self.size.width)
+        {
+            [self.platform createBlcok];
+        }
+    }
+    
+}
 @end

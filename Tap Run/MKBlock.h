@@ -9,8 +9,8 @@
 #import <SpriteKit/SpriteKit.h>
 
 @interface MKBlock : SKSpriteNode
-@property(nonatomic, readonly)NSUInteger widthNum;
-@property(nonatomic, readonly)NSUInteger heigthNum;
+@property(nonatomic, readonly, assign)NSUInteger widthNum;
+@property(nonatomic, readonly, assign)NSUInteger heigthNum;
 +(MKBlock *) blockWithColor:(UIColor *)color widthNum:(NSInteger)width heigthNum:(NSInteger)heigth;
 
 @end

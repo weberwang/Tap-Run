@@ -47,7 +47,7 @@
     for (int i = 0; i < count; i ++) {
         [self createBlcok];
     }
-    
+    self.speed = 5;
 }
 
 -(MKBlock *)createBlcok
@@ -60,6 +60,8 @@
         float px = lastBlock.position.x + lastBlock.size.width;
         block.position = CGPointMake(px, 0);
     }
+    block.physicsBody.categoryBitMask= self.categoryBitMask;
+    block.physicsBody.contactTestBitMask = self.contactTestBitMask;
     [self addChild:block];
     [self.blocks addObject:block];
     return block;
@@ -99,7 +101,11 @@
         if(self.blocks.count > 1)
         {
             MKBlock *lastSecond = (MKBlock *)[self.blocks objectAtIndex:self.blocks.count - 2];
-            randomHegith = [self randomHeigthWithLast:lastSecond maxHeigth:3];
+            if(lastSecond != nil)
+            {
+               randomHegith = [self randomHeigthWithLast:lastSecond maxHeigth:3]; 
+            }
+            
         }
     }
     else
@@ -131,6 +137,23 @@
 
     }
     return randomHegith;
+}
+
+-(void) setTestMask:(uint32_t)contactTestBitMask category:(uint32_t)categoryBitMask
+{
+    _contactTestBitMask = contactTestBitMask;
+    _categoryBitMask = categoryBitMask;
+    for (MKBlock* block in self.blocks) {
+        block.physicsBody.contactTestBitMask = contactTestBitMask;
+        block.physicsBody.categoryBitMask = categoryBitMask;
+    }
+}
+
+-(void)update:(NSTimeInterval)currentTime
+{
+    CGPoint pos = self.position;
+    pos.x -= self.speed;
+    self.position = pos;
 }
 
 @end
