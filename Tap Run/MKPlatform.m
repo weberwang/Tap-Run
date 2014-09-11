@@ -9,13 +9,30 @@
 #import "MKPlatform.h"
 #import "MKBlock.h"
 @interface MKPlatform()
-@property(nonatomic) UIColor* color;
 
+/**
+ *  检测最后一个block并返回下一个生成的block的高和宽
+ *
+ *  @return 包含宽高的数组
+ */
 -(NSArray*) checkBlock;
+/**
+ *  在指定的范围内根据最后一个block随机生成一个高度的block
+ *
+ *  @param block 最后一个block
+ *  @param max   指定范围
+ *
+ *  @return 返回需要生成的高度
+ */
 -(NSUInteger) randomHeigthWithLast:(MKBlock*)block maxHeigth:(NSUInteger)max;
 @end
 
 @implementation MKPlatform
+{
+    UIColor* _platformColor;
+    NSUInteger _minHeight;
+    NSUInteger _maxHeight;
+}
 +(MKPlatform *)sharePlatform
 {
     __strong static MKPlatform* platform = nil;
@@ -27,13 +44,19 @@
     return platform;
 }
 
+-(void)setMinHeight:(NSUInteger)min max:(NSUInteger)max
+{
+    NSAssert(min<max, @"设置高度范围不正确");
+    _minHeight = min;
+    _maxHeight = max;
+}
 -(void)reset
 {
     //设置平台颜色
     CGFloat red = random()/(RAND_MAX*1.0f);
     CGFloat green = random()/(RAND_MAX*1.0f);
     CGFloat blue = random()/(RAND_MAX*1.0f);
-    self.color = [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+    _platformColor = [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
     //初始化块容器
     if (self.blocks == nil) {
         self.blocks = [NSMutableArray arrayWithCapacity:(NSInteger)self.scene.size.width/50];
@@ -53,7 +76,8 @@
 -(MKBlock *)createBlcok
 {
     NSArray* pos = [self checkBlock];
-    MKBlock *block = [MKBlock blockWithColor:self.color widthNum:((NSNumber*)pos.firstObject).integerValue heigthNum:((NSNumber*)pos.lastObject).integerValue];
+
+    MKBlock *block = [MKBlock blockWithColor:_platformColor widthNum:((NSNumber*)pos.firstObject).integerValue heigthNum:((NSNumber*)pos.lastObject).integerValue];
     MKBlock *lastBlock = (MKBlock*) self.blocks.lastObject;
     if(lastBlock != nil)
     {
@@ -115,6 +139,7 @@
                 //增加
             case 0:
                 randomHegith = block.heigthNum + 1;
+                randomHegith = randomHegith > _maxHeight ?_maxHeight:randomHegith;
                 break;
                 //下降
             case 1:
@@ -122,6 +147,7 @@
                 {
                     NSUInteger mHeigth = arc4random()%3;
                     randomHegith = block.heigthNum - mHeigth;
+                    randomHegith = randomHegith < _minHeight ?_minHeight:randomHegith;
                 }
                 break;
             case 2:
