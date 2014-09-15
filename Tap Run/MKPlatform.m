@@ -9,7 +9,9 @@
 #import "MKPlatform.h"
 #import "MKBlock.h"
 @interface MKPlatform()
-
+@property(nonatomic, strong) UIColor *platformColor;
+@property(nonatomic, assign) NSUInteger minHeight;
+@property(nonatomic, assign) NSUInteger maxHeight;
 /**
  *  检测最后一个block并返回下一个生成的block的高和宽
  *
@@ -28,11 +30,7 @@
 @end
 
 @implementation MKPlatform
-{
-    UIColor* _platformColor;
-    NSUInteger _minHeight;
-    NSUInteger _maxHeight;
-}
+
 +(MKPlatform *)sharePlatform
 {
     __strong static MKPlatform* platform = nil;
@@ -122,7 +120,7 @@
     NSUInteger randomHegith = 0;
     if(block.heigthNum == 0)
     {
-        if(self.blocks.count > 1)
+        if(self.blocks && self.blocks.count > 1)
         {
             MKBlock *lastSecond = (MKBlock *)[self.blocks objectAtIndex:self.blocks.count - 2];
             if(lastSecond != nil)

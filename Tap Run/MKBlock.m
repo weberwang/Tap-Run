@@ -32,6 +32,7 @@ const NSInteger heigthUint = 60;
         self.anchorPoint = CGPointMake(0, 0);
         SKPhysicsBody *body = [SKPhysicsBody bodyWithEdgeLoopFromRect:self.frame];
         body.restitution = 0;
+        body.friction = 0;
         body.dynamic = NO;
         self.physicsBody = body;
     }

@@ -52,7 +52,6 @@ typedef enum : NSUInteger {
     self.physicsWorld.gravity = CGVectorMake(0, -10);
     [self.physicsWorld removeAllJoints];
     self.physicsWorld.contactDelegate = self;
-    self.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:self.frame];
 }
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -77,6 +76,8 @@ typedef enum : NSUInteger {
         self.backgroundColor = [SKColor whiteColor];
         [self initWorld];
         self.platform = [MKPlatform sharePlatform];
+        //这里原来没有调用这个函数，会导致一个死循环
+        [self.platform setMinHeight:2 max:6];
         [self.platform setTestMask:PlayerMask category:PlatFormMask];
 
         [self addChild:self.platform];
@@ -86,7 +87,7 @@ typedef enum : NSUInteger {
         self.player.physicsBody.contactTestBitMask = PlatFormMask;
         self.player.physicsBody.categoryBitMask = PlayerMask;
         MKBlock *frist = (MKBlock*)self.platform.blocks.firstObject;
-        self.player.position = CGPointMake(self.player.size.width/2, frist.size.height + self.player.size.height/2);
+        self.player.position = CGPointMake(frist.size.width/2 - self.player.size.width/2, frist.size.height + self.player.size.height/2);
         [self addChild:self.player];
         
         self.gameState = GAME_START;
@@ -131,6 +132,14 @@ typedef enum : NSUInteger {
             [self.platform createBlcok];
         }
     }
-    
+    //游戏失败的判断条件
+    if(CGRectContainsRect(self.frame, self.player.frame) == NO)
+    {
+        //暂停游戏并且给一个提示
+        self.view.paused = YES;
+        self.gameState = GAME_OVER;
+        NSLog(@"游戏结束");
+    }
+
 }
 @end

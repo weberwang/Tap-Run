@@ -9,7 +9,7 @@
 #import <SpriteKit/SpriteKit.h>
 @class MKBlock;
 @interface MKPlatform : SKNode
-@property(nonatomic) NSMutableArray* blocks;
+@property(nonatomic, strong) NSMutableArray* blocks;
 @property(nonatomic, assign) float speed;
 @property(nonatomic, readonly, assign) uint32_t contactTestBitMask;
 @property(nonatomic, readonly, assign) uint32_t categoryBitMask;
