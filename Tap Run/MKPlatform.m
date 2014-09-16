@@ -37,7 +37,7 @@
     static dispatch_once_t pre = 0;
     dispatch_once(&pre, ^{
         platform = [[super alloc] init];
-        srandom(time(nil));
+        srandom(time(0));
     });
     return platform;
 }
@@ -118,7 +118,7 @@
 -(NSUInteger)randomHeigthWithLast:(MKBlock *)block maxHeigth:(NSUInteger)max
 {
     NSUInteger randomHegith = 0;
-    if(block.heigthNum == 0)
+    if(block.heightNum == 0)
     {
         if(self.blocks && self.blocks.count > 1)
         {
@@ -136,23 +136,23 @@
         switch (rAdd) {
                 //增加
             case 0:
-                randomHegith = block.heigthNum + 1;
+                randomHegith = block.heightNum + 1;
                 randomHegith = randomHegith > _maxHeight ?_maxHeight:randomHegith;
                 break;
                 //下降
             case 1:
-                if(block.heigthNum > 1)
+                if(block.heightNum > 1)
                 {
                     NSUInteger mHeigth = arc4random()%3;
-                    randomHegith = block.heigthNum - mHeigth;
+                    randomHegith = block.heightNum - mHeigth;
                     randomHegith = randomHegith < _minHeight ?_minHeight:randomHegith;
                 }
                 break;
             case 2:
-                randomHegith = block.heigthNum;
+                randomHegith = block.heightNum;
                 break;
             default:
-                if(block.heigthNum != 0)
+                if(block.heightNum != 0)
                 {
                     randomHegith = 0;
                 }

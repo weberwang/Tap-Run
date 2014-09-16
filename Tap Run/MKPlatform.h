@@ -10,7 +10,7 @@
 @class MKBlock;
 @interface MKPlatform : SKNode
 @property(nonatomic, strong) NSMutableArray* blocks;
-@property(nonatomic, assign) float speed;
+@property(nonatomic, assign) CGFloat speed;
 @property(nonatomic, readonly, assign) uint32_t contactTestBitMask;
 @property(nonatomic, readonly, assign) uint32_t categoryBitMask;
 /**

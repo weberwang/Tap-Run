@@ -69,6 +69,7 @@ typedef enum : NSUInteger {
 
 -(void) startGame
 {
+    self.view.paused  = NO;
     SKNode *node = [self childNodeWithName:@"tip"];
     [node removeFromParent];
     if(self.platform == nil)
@@ -133,7 +134,7 @@ typedef enum : NSUInteger {
         }
     }
     //游戏失败的判断条件
-    if(CGRectContainsRect(self.frame, self.player.frame) == NO)
+    if(self.player.position.x < 0 || self.player.position.y < - self.player.size.height/2)
     {
         //暂停游戏并且给一个提示
         self.view.paused = YES;

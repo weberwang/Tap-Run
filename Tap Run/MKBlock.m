@@ -10,7 +10,7 @@
 
 
 const NSInteger widthUint = 100;
-const NSInteger heigthUint = 60;
+const NSInteger heightUint = 60;
 @interface MKBlock()
 
 @end
@@ -19,7 +19,7 @@ const NSInteger heigthUint = 60;
 
 +(MKBlock *)blockWithColor:(UIColor *)color widthNum:(NSInteger)width heigthNum:(NSInteger)heigth
 {
-    MKBlock *block = [[MKBlock alloc] initWithColor:color size:CGSizeMake(width * widthUint, heigth * heigthUint)];
+    MKBlock *block = [[MKBlock alloc] initWithColor:color size:CGSizeMake(width * widthUint, heigth * heightUint)];
     return block;
 }
 
@@ -28,7 +28,7 @@ const NSInteger heigthUint = 60;
     if(self = [super initWithColor:color size:size])
     {
         _widthNum = size.width/widthUint;
-        _heigthNum = size.height/heigthUint;
+        _heightNum = size.height/heightUint;
         self.anchorPoint = CGPointMake(0, 0);
         SKPhysicsBody *body = [SKPhysicsBody bodyWithEdgeLoopFromRect:self.frame];
         body.restitution = 0;

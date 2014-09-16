@@ -10,7 +10,7 @@
 
 @interface MKBlock : SKSpriteNode
 @property(nonatomic, readonly, assign)NSUInteger widthNum;
-@property(nonatomic, readonly, assign)NSUInteger heigthNum;
+@property(nonatomic, readonly, assign)NSUInteger heightNum;
 +(MKBlock *) blockWithColor:(UIColor *)color widthNum:(NSInteger)width heigthNum:(NSInteger)heigth;
 
 @end

@@ -12,7 +12,7 @@
 +(MKPlayer *)createPlayer
 {
     MKPlayer *player = [MKPlayer spriteNodeWithColor:[UIColor redColor] size:CGSizeMake(30, 30)];
-    player.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:CGSizeMake(player.size.width - 1, player.size.height - 2)];
+    player.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:CGSizeMake(player.size.width - 1, player.size.height - 1)];
     player.physicsBody.dynamic = YES;
     player.physicsBody.friction = 0;
     player.physicsBody.restitution = 0;
