@@ -13,6 +13,7 @@
 
 typedef enum : NSUInteger {
     GAME_START = 0,
+    GAME_READY,
     GAME_OVER,
     GAME_STOP,
 } GameState;
@@ -23,11 +24,13 @@ typedef enum : NSUInteger {
 } BodyMask;
 
 @interface GameScene()
-@property(nonatomic) MKPlatform *platform;
-@property(nonatomic) NSUInteger gameState;
-@property(nonatomic) MKPlayer *player;
+@property(nonatomic, strong) MKPlatform *platform;
+@property(nonatomic, assign) NSUInteger gameState;
+@property(nonatomic, strong) MKPlayer *player;
 @property(nonatomic) BOOL allowJump;
+@property(nonatomic) CGPoint startPoint;
 -(void) initWorld;
+-(void) reset;
 @end
 @implementation GameScene
 
@@ -42,7 +45,7 @@ typedef enum : NSUInteger {
     tipLbl.position = CGPointMake(self.size.width/2, self.size.height/2);
     [self addChild:tipLbl];
     [tipLbl runAction:link];
-    self.gameState = GAME_OVER;
+    self.gameState = GAME_READY;
     self.allowJump = YES;
     
 }
@@ -56,11 +59,14 @@ typedef enum : NSUInteger {
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     switch (self.gameState) {
-        case GAME_OVER:
+        case GAME_READY:
             [self startGame];
             break;
         case GAME_START:
             [self runGame];
+            break;
+        case GAME_OVER:
+            [self reset];
             break;
         default:
             break;
@@ -88,11 +94,24 @@ typedef enum : NSUInteger {
         self.player.physicsBody.contactTestBitMask = PlatFormMask;
         self.player.physicsBody.categoryBitMask = PlayerMask;
         MKBlock *frist = (MKBlock*)self.platform.blocks.firstObject;
-        self.player.position = CGPointMake(frist.size.width/2 - self.player.size.width/2, frist.size.height + self.player.size.height/2);
+        self.startPoint = CGPointMake(frist.size.width/2 - self.player.size.width/2, frist.size.height + self.player.size.height/2);
+        self.player.position = self.startPoint;
         [self addChild:self.player];
         
         self.gameState = GAME_START;
     }
+}
+
+-(void)reset
+{
+    self.view.paused = NO;
+    if(self.platform)
+    {
+        [self.platform reset];
+    }
+    self.player.position = self.startPoint;
+    
+    self.gameState = GAME_START;
 }
 
 -(void) runGame
@@ -102,11 +121,32 @@ typedef enum : NSUInteger {
       [self.player.physicsBody applyImpulse:CGVectorMake(0, 500*self.player.physicsBody.mass)];
         self.allowJump = NO;
     }
+    else
+    {
+        if([self childNodeWithName:@"fixedNode"] == nil)
+        {
+            SKNode* fixedNode = [SKNode node];
+            fixedNode.name = @"fixedNode";
+            fixedNode.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:1];
+            fixedNode.position = CGPointMake(self.player.position.x + 100, self.player.position.y);
+            [self addChild:fixedNode];
+//            SKPhysicsJointFixed* fixed = [SKPhysicsJointFixed jointWithBodyA:self.player.physicsBody bodyB:fixedNode.physicsBody anchor:CGPointMake(fixedNode.position.x/2 + self.player.position.x/2, fixedNode.position.y/2 + self.player.position.y/2)];
+//            [self.physicsWorld addJoint:fixed];
+        }
+    }
 }
 
 -(void)didBeginContact:(SKPhysicsContact *)contact
 {
-    self.allowJump = YES;
+    //和平台发生碰撞
+    if((contact.bodyA.categoryBitMask == PlayerMask && contact.bodyB.categoryBitMask == PlatFormMask)
+       || (contact.bodyA.categoryBitMask == PlatFormMask && contact.bodyB.categoryBitMask == PlayerMask))
+    {
+        SKNode* node = [self childNodeWithName:@"fixedNode"];
+        [node removeFromParent];
+        [self.physicsWorld removeAllJoints];
+        self.allowJump = YES;
+    }
 }
 
 -(void)update:(CFTimeInterval)currentTime

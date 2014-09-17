@@ -39,7 +39,7 @@
     skView.showsFPS = YES;
     skView.showsNodeCount = YES;
     skView.showsDrawCount = YES;
-//    skView.showsPhysics = YES;
+    skView.showsPhysics = YES;
     NSLog(@"缩放比例%f",  [UIScreen mainScreen].scale);
    
     /* Sprite Kit applies additional optimizations to improve rendering performance */
