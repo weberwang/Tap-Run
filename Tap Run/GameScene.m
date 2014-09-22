@@ -125,15 +125,64 @@ typedef enum : NSUInteger {
     {
         if([self childNodeWithName:@"fixedNode"] == nil)
         {
-            SKNode* fixedNode = [SKNode node];
-            fixedNode.name = @"fixedNode";
-            fixedNode.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:1];
-            fixedNode.position = CGPointMake(self.player.position.x + 100, self.player.position.y);
-            [self addChild:fixedNode];
-//            SKPhysicsJointFixed* fixed = [SKPhysicsJointFixed jointWithBodyA:self.player.physicsBody bodyB:fixedNode.physicsBody anchor:CGPointMake(fixedNode.position.x/2 + self.player.position.x/2, fixedNode.position.y/2 + self.player.position.y/2)];
+            //            SKPhysicsJointFixed* fixed = [SKPhysicsJointFixed jointWithBodyA:self.player.physicsBody bodyB:fixedNode.physicsBody anchor:CGPointMake(fixedNode.position.x/2 + self.player.position.x/2, fixedNode.position.y/2 + self.player.position.y/2)];
 //            [self.physicsWorld addJoint:fixed];
+            SKNode *pinNode = [self createAnchor];
+            [self createJointWithNodeA:pinNode nodeB:self.player];
         }
     }
+}
+-(void) createJointWithNodeA:(SKNode*) nodeA nodeB:(SKNode*) nodeB
+{
+//    SKNode* rope = [self createNopeWithpointA:nodeA.position pointB:nodeB.position];
+    
+//    SKPhysicsJointPin *pinA = [SKPhysicsJointPin jointWithBodyA:nodeA.physicsBody bodyB:rope.physicsBody anchor:nodeA.position];
+//    SKPhysicsJointPin *pinB = [SKPhysicsJointPin jointWithBodyA:nodeB.physicsBody bodyB:rope.physicsBody anchor:nodeB.position];
+    SKPhysicsJointLimit *limit = [SKPhysicsJointLimit jointWithBodyA:nodeA.physicsBody bodyB:nodeB.physicsBody anchorA:nodeA.position anchorB:nodeB.position];
+//    [self.physicsWorld addJoint:pinA];
+//    [self.physicsWorld addJoint:pinB];
+    [self.physicsWorld addJoint:limit];
+    __weak GameScene *mSelf = self;
+    SKAction *remove = [SKAction sequence:@[[SKAction waitForDuration:0.5], [SKAction runBlock:^{
+        __strong GameScene *bSelf = mSelf;
+        [bSelf.physicsWorld removeAllJoints];
+        bSelf.player.physicsBody.dynamic = NO;
+        bSelf.player.physicsBody.dynamic = YES;
+    }]]];
+    [self runAction:remove];
+//    ln.frame.size = CGSizeMake(;, <#CGFloat height#>)
+}
+
+-(SKNode*) createAnchor
+{
+    SKNode* pinNode = [SKNode node];
+    pinNode.name = @"fixedNode";
+    pinNode.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:1];
+    pinNode.physicsBody.dynamic = NO;
+    pinNode.physicsBody.affectedByGravity = NO;
+    pinNode.position = CGPointMake(self.player.position.x + 100, self.player.position.y);
+    [self addChild:pinNode];
+    return pinNode;
+}
+-(SKNode*) createNopeWithpointA:(CGPoint)pointA pointB:(CGPoint)pointB
+{
+    double roation = atan((pointB.y - pointA.y)/(pointB.x - pointA.x))*180/M_PI;
+    SKShapeNode *ln = [SKShapeNode shapeNodeWithEllipseOfSize:CGSizeMake([self lenghtWithPointA:pointA pointB:pointB], 1)];
+    ln.physicsBody = [SKPhysicsBody bodyWithRectangleOfSize:ln.frame.size];
+    ln.physicsBody.affectedByGravity = NO;
+//    ln.physicsBody.dynamic = NO;
+    ln.physicsBody.categoryBitMask = 1 << 3;
+    ln.zRotation = roation;
+    ln.position = CGPointMake(pointB.x + ln.frame.size.width/2, pointB.y);
+    [self addChild:ln];
+    return  ln;
+}
+-(CGFloat) lenghtWithPointA:(CGPoint) pointA pointB:(CGPoint) pointB
+{
+    float disY = pointB.y - pointA.y;
+    float disX = pointB.x - pointA.x;
+    float lenght = sqrtf((disX*disX)+(disY*disY));
+    return lenght;
 }
 
 -(void)didBeginContact:(SKPhysicsContact *)contact
@@ -143,6 +192,7 @@ typedef enum : NSUInteger {
        || (contact.bodyA.categoryBitMask == PlatFormMask && contact.bodyB.categoryBitMask == PlayerMask))
     {
         SKNode* node = [self childNodeWithName:@"fixedNode"];
+        node.physicsBody = nil;
         [node removeFromParent];
         [self.physicsWorld removeAllJoints];
         self.allowJump = YES;
