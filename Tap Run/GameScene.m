@@ -123,27 +123,27 @@ typedef enum : NSUInteger {
     }
     else
     {
-        if([self childNodeWithName:@"fixedNode"] == nil)
-        {
-            //            SKPhysicsJointFixed* fixed = [SKPhysicsJointFixed jointWithBodyA:self.player.physicsBody bodyB:fixedNode.physicsBody anchor:CGPointMake(fixedNode.position.x/2 + self.player.position.x/2, fixedNode.position.y/2 + self.player.position.y/2)];
-//            [self.physicsWorld addJoint:fixed];
-            SKNode *pinNode = [self createAnchor];
-            [self createJointWithNodeA:pinNode nodeB:self.player];
-        }
+        [self createField];
+//        if([self childNodeWithName:@"fixedNode"] == nil)
+//        {
+//            SKNode *pinNode = [self createAnchor];
+//            [self createJointWithNodeA:pinNode nodeB:self.player];
+//        }
     }
 }
 -(void) createJointWithNodeA:(SKNode*) nodeA nodeB:(SKNode*) nodeB
 {
 //    SKNode* rope = [self createNopeWithpointA:nodeA.position pointB:nodeB.position];
-    
+//    
 //    SKPhysicsJointPin *pinA = [SKPhysicsJointPin jointWithBodyA:nodeA.physicsBody bodyB:rope.physicsBody anchor:nodeA.position];
 //    SKPhysicsJointPin *pinB = [SKPhysicsJointPin jointWithBodyA:nodeB.physicsBody bodyB:rope.physicsBody anchor:nodeB.position];
+//    CGPoint local = [self convertPoint:nodeA.position toNode:self];
     SKPhysicsJointLimit *limit = [SKPhysicsJointLimit jointWithBodyA:nodeA.physicsBody bodyB:nodeB.physicsBody anchorA:nodeA.position anchorB:nodeB.position];
 //    [self.physicsWorld addJoint:pinA];
 //    [self.physicsWorld addJoint:pinB];
     [self.physicsWorld addJoint:limit];
     __weak GameScene *mSelf = self;
-    SKAction *remove = [SKAction sequence:@[[SKAction waitForDuration:0.5], [SKAction runBlock:^{
+    SKAction *remove = [SKAction sequence:@[[SKAction waitForDuration:0.6], [SKAction runBlock:^{
         __strong GameScene *bSelf = mSelf;
         [bSelf.physicsWorld removeAllJoints];
         bSelf.player.physicsBody.dynamic = NO;
@@ -160,7 +160,7 @@ typedef enum : NSUInteger {
     pinNode.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius:1];
     pinNode.physicsBody.dynamic = NO;
     pinNode.physicsBody.affectedByGravity = NO;
-    pinNode.position = CGPointMake(self.player.position.x + 100, self.player.position.y);
+    pinNode.position = CGPointMake(self.player.position.x + 100, self.player.position.y + 50);
     [self addChild:pinNode];
     return pinNode;
 }
@@ -185,6 +185,18 @@ typedef enum : NSUInteger {
     return lenght;
 }
 
+-(SKFieldNode*) createField
+{
+    SKFieldNode *field = [SKFieldNode radialGravityField];
+    field.region = [[SKRegion alloc] initWithRadius:100];
+    field.enabled = YES;
+    field.minimumRadius = 10;
+    field.strength = 2;
+    field.position = CGPointMake(100, 500);
+    [self addChild:field];
+    return field;
+}
+
 -(void)didBeginContact:(SKPhysicsContact *)contact
 {
     //和平台发生碰撞
@@ -196,6 +208,10 @@ typedef enum : NSUInteger {
         [node removeFromParent];
         [self.physicsWorld removeAllJoints];
         self.allowJump = YES;
+        if(self.player.physicsBody.velocity.dy < 0)
+        {
+//            self.player.physicsBody.dynamic = NO;
+        }
     }
 }
 
@@ -224,7 +240,7 @@ typedef enum : NSUInteger {
         }
     }
     //游戏失败的判断条件
-    if(self.player.position.x < 0 || self.player.position.y < - self.player.size.height/2)
+    if(!CGRectContainsPoint(self.frame, self.player.position))
     {
         //暂停游戏并且给一个提示
         self.view.paused = YES;
